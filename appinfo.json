@@ -1,0 +1,14 @@
+{
+  "id": "com.andresa.home",
+  "version": "1.0.0",
+  "vendor": "Andresa",
+  "type": "web",
+  "main": "index.html",
+  "title": "Minha Home",
+  "appDescription": "Tela inicial personalizada",
+  "icon": "icon.png",
+  "largeIcon": "icon.png",
+  "bgColor": "#0b0d12",
+  "iconColor": "#f47521",
+  "disableBackHistoryAPI": true
+}

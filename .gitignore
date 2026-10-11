@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Cloudflare Wrangler
+.wrangler/
+
+# Build output
+*.ipk
+
+# Secrets / pairing keys (never commit)
+tools/.lgkey
+.dev.vars
+*.secret
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Editor / AI tooling
+.claude/
+CLAUDE.md
+*.jsonl
+.idea/
+.vscode/

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Minha Home</title>
+<style>
+  /* Fonte embutida (a TV não tem SF Pro; sem isto cai na fonte da LG, diferente do mockup) */
+  @font-face{
+    font-family:'InterVar';
+    src:url('assets/inter.woff2') format('woff2');
+    font-weight:100 900; font-style:normal; font-display:swap;
+  }
+  :root{
+    --bg:#0b0d12;
+    --ink:#0b1220;
+    --ink-soft:#43506b;
+    --card: rgba(255,255,255,.70);
+    --card-strong: rgba(255,255,255,.78);
+    --card-border: rgba(255,255,255,.55);
+    --shadow: 0 24px 60px rgba(16,24,40,.28);
+    --radius: 18px;     /* cards (menor, como no original) */
+    --radius-sm: 14px;  /* botões de app */
+    --focus: #ffffff;
+    --font: 'InterVar', -apple-system, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+    --gap: 26px;
+    --widget-h: 240px;  /* altura dos widgets (maiores que os botões, como no original) */
+    --tile-h: 190px;    /* altura dos botões de app */
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%; width:100%; overflow:hidden; background:var(--bg); font-family:var(--font); color:var(--ink);}
+  body{
+    background-color: var(--bg);
+    /* wallpaper em cores plenas (sem layer escura; sem 'fixed' que quebra no webkit do webOS) */
+    background-image: url("assets/wallpaper.webp");
+    background-position: center center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    -webkit-font-smoothing:antialiased;
+    user-select:none;
+  }
+  /* 'inset' não existe no Chromium do webOS 6.x — offsets explícitos */
+  #app{position:fixed; top:0; right:0; bottom:0; left:0; width:100%; height:100%; display:flex; flex-direction:column;}
+
+  /* ===== Top bar ===== */
+  .topbar{display:flex; align-items:center; justify-content:space-between; padding:34px 56px 10px;}
+  .brand{font-size:30px; font-weight:600; letter-spacing:.5px; color:#fff; text-shadow:0 2px 14px rgba(0,0,0,.35);}
+  .brand b{font-weight:300;}
+  .sysicons{display:flex; align-items:center; gap:18px; color:#fff;}
+  .last-update{font-size:16px; font-weight:500; color:rgba(255,255,255,.92); font-variant-numeric:tabular-nums; text-shadow:0 2px 12px rgba(0,0,0,.4);}
+  .topbar-refresh{display:flex; align-items:center; gap:9px; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.3);
+    color:#fff; font-family:var(--font); font-weight:600; font-size:18px; padding:10px 20px; border-radius:999px; cursor:pointer;
+    backdrop-filter:blur(16px) saturate(140%); -webkit-backdrop-filter:blur(16px) saturate(140%); box-shadow:0 4px 16px rgba(0,0,0,.2); transition:background .15s;}
+  .topbar-refresh:hover, .topbar-refresh:focus{background:rgba(255,255,255,.3); outline:none;}
+  .topbar-refresh svg{width:22px; height:22px; flex:none;}
+  .topbar-refresh.spin svg{animation:spin .8s linear infinite;}
+  /* toast de confirmação */
+  .toast{position:fixed; top:92px; left:50%; transform:translateX(-50%) translateY(-14px); z-index:50;
+    background:rgba(20,22,28,.92); color:#fff; font-family:var(--font); font-weight:600; font-size:17px;
+    padding:13px 24px; border-radius:999px; box-shadow:0 12px 34px rgba(0,0,0,.4);
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+    opacity:0; pointer-events:none; transition:opacity .25s, transform .25s;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  /* ===== Layout principal ===== */
+  .stage{flex:1; display:grid; grid-template-columns: 1fr 384px; gap:var(--gap); padding:14px 56px 48px 118px; min-height:0;}
+  .left{display:flex; flex-direction:column; min-height:0;}
+
+  /* ===== Cards de topo ===== */
+  .toprow{display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); height:var(--widget-h); flex:none; margin-bottom:var(--gap);}
+  .card{
+    background:var(--card); border:1px solid var(--card-border);
+    border-radius:var(--radius); box-shadow:var(--shadow);
+    backdrop-filter:blur(30px) saturate(140%); -webkit-backdrop-filter:blur(30px) saturate(140%);
+  }
+  .glass-info{display:flex; align-items:stretch; gap:30px; padding:28px 32px;}
+  .gi-col{display:flex; flex-direction:column; justify-content:center; gap:4px;}
+  .gi-greet{font-size:21px; font-weight:600; color:var(--ink);}
+  .gi-clock{font-size:62px; font-weight:600; line-height:1; letter-spacing:-1.5px; font-variant-numeric:tabular-nums;}
+  .gi-date{font-size:16px; color:var(--ink-soft); font-weight:500;}
+  .gi-divider{width:1px; background:rgba(11,18,32,.14); margin:4px 0;}
+  .gi-city{font-size:18px; font-weight:600;}
+  .gi-wrap{display:flex; align-items:center; gap:14px;}
+  .gi-temp{font-size:52px; font-weight:600; line-height:1; letter-spacing:-1px;}
+  .gi-wicon{line-height:0; display:flex; align-items:center;}
+  .gi-cond{font-size:15px; color:var(--ink-soft); font-weight:500;}
+  .gi-minmax{font-size:15px; color:var(--ink-soft); font-weight:600;}
+
+  .match{padding:26px 34px; display:flex; flex-direction:column; justify-content:center; gap:20px;}
+  .match-league{font-size:16px; font-weight:600; color:var(--ink);}
+  .match-row{display:flex; align-items:center; justify-content:space-between;}
+  .team{display:flex; flex-direction:column; align-items:center; gap:12px; width:140px;}
+  .team-badge{width:84px; height:84px; display:grid; place-items:center; font-weight:800; font-size:22px; color:#fff; border-radius:50%;}
+  .team-badge img{width:82px; height:82px; object-fit:contain;}
+  .team-name{font-size:16px; font-weight:600;}
+  .match-center{text-align:center; display:flex; flex-direction:column; gap:4px;}
+  .match-label{font-size:14px; color:var(--ink-soft); font-weight:600; text-transform:none;}
+  .match-time{font-size:36px; font-weight:700; letter-spacing:-.5px; font-variant-numeric:tabular-nums;}
+  .match-venue{font-size:14px; color:var(--ink-soft);}
+
+  /* ===== Grade de apps ===== */
+  /* área central com scroll vertical (barras ocultas; folga para o foco não ser cortado) */
+  .apps-scroll{
+    flex:1; min-height:0;
+    overflow-y:auto; overflow-x:hidden;
+    /* padding dá espaço para o zoom/anel do foco; margens negativas laterais mantêm o alinhamento
+       com os widgets e evitam corte horizontal; margem-topo compensada para manter o gap */
+    margin:-12px -12px 0;
+    padding:12px;
+    scroll-padding:18px;                 /* mantém o item focado longe das bordas ao rolar */
+    scrollbar-width:none;                /* Firefox */
+    -ms-overflow-style:none;             /* legado */
+    -webkit-overflow-scrolling:touch;
+    /* fade suave na base para o encontro com o wallpaper ficar limpo */
+    -webkit-mask-image:linear-gradient(to bottom, #000 calc(100% - 22px), transparent);
+    mask-image:linear-gradient(to bottom, #000 calc(100% - 22px), transparent);
+  }
+  .apps-scroll::-webkit-scrollbar{display:none; width:0; height:0;}
+  .apps{display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:var(--tile-h); gap:var(--gap);}
+  .tile{
+    position:relative; border-radius:var(--radius-sm); overflow:hidden; cursor:pointer;
+    display:grid; place-items:center; isolation:isolate;
+    box-shadow:0 8px 18px rgba(12,18,32,.16), inset 0 1px 0 rgba(255,255,255,.22);
+    transition:transform .18s cubic-bezier(.2,.8,.2,1), box-shadow .18s; outline:none;
+    border:1px solid rgba(255,255,255,.08);
+  }
+  /* brilho/gloss no topo do card */
+  .tile::before{content:""; position:absolute; top:0; right:0; bottom:0; left:0; z-index:1; pointer-events:none;
+    background:
+      radial-gradient(120% 70% at 25% -10%, rgba(255,255,255,.28), rgba(255,255,255,0) 55%),
+      linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.02) 60%, rgba(0,0,0,.06));}
+  .tile::after{content:""; position:absolute; top:0; right:0; bottom:0; left:0; z-index:2; pointer-events:none;
+    border-radius:inherit; box-shadow:inset 0 0 0 1px rgba(255,255,255,.10);}
+  .tile:focus, .tile.focus{transform:scale(1.04);
+    box-shadow:0 0 0 4px var(--focus), 0 12px 26px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.3); z-index:5;}
+  .tile .logo{position:relative; z-index:3; display:flex; align-items:center; justify-content:center; gap:12px; width:100%; height:100%; padding:0 16px; text-align:center;}
+  .tile .logo svg{flex:none;}
+  /* estilo padrão (apps sem logo personalizado) */
+  .tile .def{position:relative; z-index:3; display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .tile .def .ini{width:62px; height:62px; border-radius:16px; display:grid; place-items:center; font-weight:800; font-size:30px; background:rgba(255,255,255,.16); box-shadow:inset 0 1px 0 rgba(255,255,255,.3);}
+  .tile .def .nm{font-weight:700; font-size:19px; letter-spacing:-.2px; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+
+  /* ===== Painel Crunchyroll ===== */
+  /* ===== painel direito com abas ===== */
+  .side{display:flex; flex-direction:column; gap:14px; min-height:0;}
+  .tabs{display:flex; gap:12px; flex:none;}
+  .tab-btn{flex:1; display:flex; align-items:center; justify-content:center; gap:10px;
+    background:rgba(255,255,255,.5); border:none; border-radius:16px; padding:15px 10px;
+    font-family:var(--font); font-weight:800; font-size:18px; color:#9aa0a8; cursor:pointer;
+    box-shadow:0 10px 24px rgba(16,24,40,.16); backdrop-filter:blur(26px) saturate(140%);
+    -webkit-backdrop-filter:blur(26px) saturate(140%); transition:background .15s, color .15s, box-shadow .15s;}
+  .tab-btn svg{width:24px; height:24px; flex:none; opacity:.5; transition:opacity .15s;}
+  .tab-btn.active{background:#fff; color:#141519; box-shadow:0 14px 30px rgba(16,24,40,.24);}
+  .tab-btn.active svg{opacity:1;}
+  .side .cr{flex:1; min-height:0;}
+
+  /* ===== itens de futebol (mesma disposição do widget do jogo) ===== */
+  .fb-item{padding:16px 4px; border-top:1px solid #eef0f2;}
+  .fb-item.first{border-top:none; padding-top:8px;}
+  .fb-comp{font-size:13px; font-weight:700; color:#9aa0a8; text-align:center; margin-bottom:12px;}
+  .fb-row{display:flex; align-items:center; justify-content:space-between;}
+  .fb-team{display:flex; flex-direction:column; align-items:center; gap:9px; width:92px;}
+  .fb-crest{width:50px; height:50px; display:grid; place-items:center;}
+  .fb-crest img{width:50px; height:50px; object-fit:contain;}
+  .fb-crest .ini{width:46px; height:46px; border-radius:50%; display:grid; place-items:center; font-size:14px; font-weight:800; color:#fff;}
+  .fb-tname{font-size:13px; font-weight:600; color:#1b1d22; text-align:center; line-height:1.2;}
+  .fb-center{flex:1; text-align:center; display:flex; flex-direction:column; gap:4px; padding:0 4px;}
+  .fb-label{font-size:12px; font-weight:600; color:#9aa0a8;}
+  .fb-mid{font-size:26px; font-weight:800; color:#1b1d22; letter-spacing:-.5px; font-variant-numeric:tabular-nums; line-height:1;}
+  .fb-venue{font-size:11px; color:#9aa0a8; line-height:1.2;}
+
+  .cr{background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); display:flex; flex-direction:column; overflow:hidden;}
+  .cr-head{padding:26px 26px 16px; display:flex; justify-content:space-between; align-items:flex-start;}
+  .cr-head-text{min-width:0;}
+  .refresh-btn{background:transparent; border:none; cursor:pointer; color:#b3b8c0; padding:6px; margin:-4px -6px 0 8px; border-radius:50%; flex:none; transition:color .15s, background .15s;}
+  .refresh-btn:hover, .refresh-btn:focus{color:#1b1d22; background:rgba(0,0,0,.05); outline:none;}
+  .refresh-btn svg{width:22px; height:22px; display:block;}
+  .refresh-btn.spin svg{animation:spin .8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .cr-brand{display:flex; align-items:center; gap:10px; margin-bottom:14px;}
+  .cr-brand .ring{width:30px; height:30px;}
+  .cr-brand span{font-size:19px; font-weight:800; color:#f47521; letter-spacing:.2px;}
+  .cr-title{font-size:26px; font-weight:800; color:#141519; line-height:1.1;}
+  .cr-sub{font-size:15px; color:#8a8f98; font-weight:600; margin-top:4px;}
+  /* scroll interno (até 20 itens), barra oculta como no painel central */
+  .cr-list{flex:1; overflow-y:auto; overflow-x:hidden; padding:0 22px 20px; scrollbar-width:none; -ms-overflow-style:none;}
+  .cr-list::-webkit-scrollbar{display:none; width:0; height:0;}
+  .cr-group-label{font-size:14px; font-weight:700; color:#9aa0a8; padding:16px 4px 10px; border-top:1px solid #eef0f2;}
+  .cr-group-label.first{border-top:none; padding-top:6px;}
+  .cr-item{display:flex; gap:16px; align-items:center; padding:12px 4px;}
+  .cr-thumb{width:120px; height:72px; border-radius:10px; flex:none; background-size:cover; background-position:center; position:relative; box-shadow:0 3px 8px rgba(0,0,0,.16); overflow:hidden;}
+  .cr-badge{position:absolute; top:5px; left:5px; background:#f47521; color:#fff; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px; letter-spacing:.4px;}
+  .cr-meta{min-width:0; flex:1;}
+  .cr-name{font-size:18px; font-weight:700; color:#1b1d22; line-height:1.25; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
+  .cr-ep{font-size:14px; color:#9aa0a8; font-weight:600; margin-top:4px;}
+
+  /* ===== rail esquerda (decorativa, como no mockup) ===== */
+  .leftrail{position:fixed; left:46px; top:52%; transform:translateY(-50%); display:flex; flex-direction:column; gap:38px; color:#fff;}
+  .leftrail .ic{width:30px; height:30px; opacity:.96; filter:drop-shadow(0 2px 10px rgba(0,0,0,.55)); cursor:pointer; transition:transform .15s;}
+  .leftrail .ic:hover{transform:scale(1.15);}
+
+  .fade-in{animation:fade .6s both;}
+  @keyframes fade{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:none;}}
+
+  /* ===== Compat webOS 6.x (Chromium < 84 não tem flex gap): margens no lugar de gap.
+     Aplica só onde 'inset' não existe (mesmo motor antigo); no preview moderno nada muda. ===== */
+  @supports not (inset: 0){
+    .sysicons > * + *{margin-left:18px}
+    .topbar-refresh > * + *{margin-left:9px}
+    .side > * + *{margin-top:14px}
+    .tabs > * + *{margin-left:12px}
+    .tab-btn > * + *{margin-left:10px}
+    .fb-team > * + *{margin-top:9px}
+    .fb-center > * + *{margin-top:4px}
+    .glass-info > * + *{margin-left:30px}
+    .gi-col > * + *{margin-top:4px}
+    .gi-wrap > * + *{margin-left:14px}
+    .match > * + *{margin-top:16px}
+    .team > * + *{margin-top:8px}
+    .match-center > * + *{margin-top:3px}
+    .leftrail > * + *{margin-top:38px}
+    .cr-brand > * + *{margin-left:10px}
+    .cr-item > * + *{margin-left:16px}
+    .tile .logo > * + *{margin-left:12px}
+    .tile .def > * + *{margin-top:10px}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar fade-in">
+    <div class="brand"><b>web</b>OS</div>
+    <div class="sysicons">
+      <div class="last-update" id="lastUpdate">última atualização —:—</div>
+      <button class="topbar-refresh" id="refreshAll" onclick="refreshAll()" aria-label="Atualizar tudo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/></svg>
+        <span>Atualizar</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="left">
+     <!-- widgets + apps no MESMO contêiner de scroll: rolam juntos -->
+     <div class="apps-scroll">
+      <div class="toprow">
+        <!-- Card saudação + clima -->
+        <div class="card glass-info fade-in" style="animation-delay:.05s">
+          <div class="gi-col">
+            <div class="gi-greet" id="greet">Olá</div>
+            <div class="gi-clock" id="clockBig">--:--</div>
+            <div class="gi-date" id="dateLine">—</div>
+          </div>
+          <div class="gi-divider"></div>
+          <div class="gi-col">
+            <div class="gi-city" id="city">São Paulo</div>
+            <div class="gi-wrap">
+              <div class="gi-wicon" id="wicon"></div>
+              <div class="gi-temp" id="temp">--°</div>
+            </div>
+            <div class="gi-cond" id="cond">—</div>
+            <div class="gi-minmax" id="minmax">—</div>
+          </div>
+        </div>
+
+        <!-- Card jogo -->
+        <div class="card match fade-in" id="matchCard" style="animation-delay:.1s">
+          <div class="match-league" id="league">—</div>
+          <div class="match-row">
+            <div class="team">
+              <div class="team-badge" id="homeBadge">—</div>
+              <div class="team-name" id="homeName">—</div>
+            </div>
+            <div class="match-center">
+              <div class="match-label" id="matchLabel">Hoje</div>
+              <div class="match-time" id="matchTime">--:--</div>
+              <div class="match-venue" id="venue">—</div>
+            </div>
+            <div class="team">
+              <div class="team-badge" id="awayBadge">—</div>
+              <div class="team-name" id="awayName">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grade de apps (rola junto com os widgets acima) -->
+      <div class="apps" id="apps"></div>
+     </div>
+    </div>
+
+    <!-- Painel Crunchyroll -->
+    <div class="side fade-in" style="animation-delay:.15s">
+      <!-- duas abas (botões com o mesmo estilo do painel) -->
+      <div class="tabs">
+        <button class="tab-btn active" id="tabCrunchy" onclick="switchTab('crunchy')">
+          <svg class="ring" viewBox="0 0 24 24" fill="#f47521"><path d="M2.933 13.467a10.55 10.55 0 1 1 21.067-.8V12c0-6.627-5.373-12-12-12S0 5.373 0 12s5.373 12 12 12h.8a10.617 10.617 0 0 1-9.867-10.533zM19.2 14a3.85 3.85 0 0 1-1.333-7.467A7.89 7.89 0 0 0 14 5.6a8.4 8.4 0 1 0 8.4 8.4 6.492 6.492 0 0 0-.133-1.6A3.415 3.415 0 0 1 19.2 14z"/></svg>
+          <span>crunchyroll</span>
+        </button>
+        <button class="tab-btn" id="tabFutebol" onclick="switchTab('futebol')">
+          <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7l4 3-1.5 4.5h-5L8 10z" fill="currentColor"/><path d="M12 2v5M12 15v7M4.5 8l3.5 2M19.5 8L16 10M6 18l3-3M18 18l-3-3" stroke="currentColor" stroke-width="1.4" fill="none"/></svg>
+          <span>Futebol</span>
+        </button>
+      </div>
+
+      <!-- painel Crunchyroll -->
+      <div class="cr" id="panelCrunchy">
+        <div class="cr-head">
+          <div class="cr-head-text">
+            <div class="cr-title">Novos episódios</div>
+            <div class="cr-sub" id="crSub">Sua watchlist · Áudio japonês</div>
+          </div>
+        </div>
+        <div class="cr-list" id="crList"></div>
+      </div>
+
+      <!-- painel Futebol -->
+      <div class="cr" id="panelFutebol" style="display:none">
+        <div class="cr-head">
+          <div class="cr-head-text">
+            <div class="cr-title">Jogos</div>
+            <div class="cr-sub">Próximos e resultados</div>
+          </div>
+        </div>
+        <div class="cr-list" id="fbList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="leftrail fade-in" style="animation-delay:.2s">
+  <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+  <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-1.8-.3 1.6 1.6 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.6 1.6 0 00-1-1.5 1.6 1.6 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00.3-1.8 1.6 1.6 0 00-1.5-1H3a2 2 0 110-4h.1a1.6 1.6 0 001.5-1 1.6 1.6 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 001.8.3H9a1.6 1.6 0 001-1.5V3a2 2 0 114 0v.1a1.6 1.6 0 001 1.5 1.6 1.6 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00-.3 1.8V9a1.6 1.6 0 001.5 1H21a2 2 0 110 4h-.1a1.6 1.6 0 00-1.5 1z"/></svg>
+  <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+  <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/></svg>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="logos.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
