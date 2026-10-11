@@ -1,0 +1,17 @@
+#!/usr/bin/expect -f
+# Uso: tvssh.exp <ip> <senha> <comando remoto>
+set timeout 40
+set tv  [lindex $argv 0]
+set pw  [lindex $argv 1]
+set cmd [lindex $argv 2]
+log_user 1
+spawn ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+    -o PubkeyAuthentication=no -o PreferredAuthentications=password \
+    -o ConnectTimeout=10 -p 22 root@$tv $cmd
+expect {
+  -re {(?i)assword:} { send -- "$pw\r"; exp_continue }
+  -re {(?i)denied}   { puts "\n>>AUTH_FAIL"; exit 7 }
+  eof
+}
+catch wait result
+exit [lindex $result 3]

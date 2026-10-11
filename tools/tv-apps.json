@@ -1,0 +1,140 @@
+[
+  {
+    "id": "youtube.leanback.v4",
+    "title": "YouTube",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "com.visiontv.app",
+    "title": "IPTV 4K",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "amazon",
+    "title": "Prime Video",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "com.crunchyroll.webapp",
+    "title": "Crunchyroll",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "com.webos.app.lgchannels",
+    "title": "LG Channels",
+    "systemApp": true,
+    "removable": false
+  },
+  {
+    "id": "globoplaywebos",
+    "title": "Globoplay",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "com.webos.app.discovery",
+    "title": "Apps",
+    "systemApp": true,
+    "removable": false
+  },
+  {
+    "id": "com.disney.disneyplus-prod",
+    "title": "Disney+",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "com.apple.appletv",
+    "title": "Apple TV",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "com.mercadolibre.mercadoplay",
+    "title": "Mercado Play",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "spotify-beehive",
+    "title": "Spotify - Músicas e podcasts",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "webos.day",
+    "title": "LG Streaming Week",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "com.webos.app.homeconnect",
+    "title": "Painel de Controle",
+    "systemApp": true,
+    "removable": false
+  },
+  {
+    "id": "com.webos.app.sportsteamsettings",
+    "title": "Alerta de esportes",
+    "systemApp": true,
+    "removable": false
+  },
+  {
+    "id": "com.webos.app.browser",
+    "title": "Navegador Web",
+    "systemApp": true,
+    "removable": false
+  },
+  {
+    "id": "com.webos.app.mediadiscovery",
+    "title": "Reprodutor de Mídia",
+    "systemApp": true,
+    "removable": false
+  },
+  {
+    "id": "amazon.alexa.view",
+    "title": "Amazon Alexa",
+    "systemApp": true,
+    "removable": false
+  },
+  {
+    "id": "com.webos.app.roomconnect",
+    "title": "Compartilhamento de Ambiente para Ambiente",
+    "systemApp": true,
+    "removable": false
+  },
+  {
+    "id": "dazn",
+    "title": "DAZN",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "com.directvgo.webostv-rt",
+    "title": "DGO",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "org.webosbrew.hbchannel",
+    "title": "Homebrew Channel",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "com.andresa.home",
+    "title": "Minha Home",
+    "systemApp": false,
+    "removable": true
+  },
+  {
+    "id": "com.apple.applemusic",
+    "title": "Apple Music",
+    "systemApp": false,
+    "removable": true
+  }
+]
