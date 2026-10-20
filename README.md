@@ -1,4 +1,4 @@
-# webOS Home
+# Custom webOS Home
 
 A custom, Apple-TV-style home screen for a **rooted LG webOS 6.x TV**, built as a
 plain static web app and installed as a native `.ipk`. It replaces the busy stock
