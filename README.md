@@ -11,7 +11,9 @@ football** fixtures/results — all over a full-screen wallpaper.
 > Personal project, for a TV I own. The old webOS browser engine (Chromium ~79)
 > drove most of the technical choices — see [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md).
 
-![placeholder: add a photo/screenshot of the home screen here](docs/screenshot.png)
+![The home screen: greeting/weather and next-match widgets, the app grid, and the Crunchyroll panel over the wallpaper](docs/screenshot.png)
+
+<sub>Browser preview of the layout — swap in a real photo of the TV when handy.</sub>
 
 ---
 
@@ -111,5 +113,4 @@ with permissive CORS so the TV's old browser can read it. See
 
 ## License
 
-Currently a private, personal project. If/when it is open-sourced, a license (MIT is a
-likely default) will be added here. Until then, all rights reserved.
+Released under the [MIT License](LICENSE) — personal project, free to use and adapt.
