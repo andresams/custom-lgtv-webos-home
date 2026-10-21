@@ -129,6 +129,14 @@ on-screen overlay shows the level. This lives in `app.js`:
 To change the mapping (e.g. make `0` mean 0%, or use a different step), edit the small
 block in `onKey()` and the `setBacklight` call.
 
+This only works on the home screen (a web app only gets keys while it's foreground).
+**In any app**, the root daemon `backlight-keys.js` handles backlight instead: a press of
+the **"More Actions" (3-dots) button** (evdev code `994`) steps the backlight **+10%**,
+wrapping 100 → 0. To use a different button, change `BL_STEP_CODE` at the top of
+`backlight-keys.js` (find a button's code with `tools/evcap.js`), then redeploy the daemon
+(copy to `/var/lib/webosbrew/backlight-keys/daemon.js` and run
+`sh /var/lib/webosbrew/init.d/backlight-keys`).
+
 ## Remapping the hardware buttons
 
 The dedicated streaming buttons on the remote (Netflix, Disney+, the Assistant button…)

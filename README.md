@@ -33,10 +33,11 @@ football** fixtures/results — all over a full-screen wallpaper.
 - **Single refresh button** — one control in the top bar refreshes every on-screen
   API at once, with a timeout-guarded "all updated" toast and a "last updated HH:MM"
   stamp.
-- **Backlight shortcuts** — the remote's number keys set the TV backlight (1–9 →
-  10–90%, 0 → 100%). On the home screen the app handles it (with an on-screen overlay);
-  a small **root daemon** (`backlight-keys.js`) makes it work in **any app** by reading
-  the remote at the input layer and showing a system toast. See
+- **Backlight shortcuts** — on the home screen, the remote's number keys set the TV
+  backlight (1–9 → 10–90%, 0 → 100%) with an on-screen overlay. In **any app**, the
+  remote's "More Actions" (3-dots) button steps the backlight **+10%** (wrapping 100 → 0),
+  handled by a small **root daemon** (`backlight-keys.js`) that reads the remote at the
+  input layer and shows a system toast. See
   [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md#backlight-via-the-number-keys).
 - **Remappable hardware buttons** — the same daemon turns the remote's dedicated
   streaming buttons (Netflix, Disney+, the Assistant button…) into launchers for apps

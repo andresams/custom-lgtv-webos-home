@@ -2,11 +2,9 @@
 // remote-keys (arquivo backlight-keys/daemon.js) — daemon root, webOS rooteado
 // Lê o controle direto da camada de input (/dev/input/event*) e age em
 // QUALQUER app (um app web só recebe teclas quando está em primeiro plano):
-//   • teclas NUMÉRICAS -> ajustam o backlight (1..9 = 10..90%, 0 = 100%)
+//   • botão "Mais Ações" (3 pontinhos, code 994) -> backlight +10% (ciclo 0..100)
 //   • botões dedicados -> reabrem o app desejado e fecham o nativo (REMAP)
 // Feedback do backlight via toast de sistema. Iniciado por autostart-backlight.sh.
-//
-// Códigos evdev dos dígitos (Magic Remote): 2..10 = 1..9, 11 = 0.
 // =========================================================================
 var cp = require('child_process');
 
@@ -15,9 +13,9 @@ var DEVICES = [
   '/dev/input/event1', '/dev/input/event3', '/dev/input/event4',
   '/dev/input/event5', '/dev/input/event6', '/dev/input/event7'
 ];
-var REC = 16;        // tamanho do struct input_event (userspace 32-bit)
-var DEBOUNCE = 150;  // ms — evita disparo duplicado entre dispositivos
-var last = 0, lastBtn = 0;
+var REC = 16;              // tamanho do struct input_event (userspace 32-bit)
+var BL_STEP_CODE = 994;    // botão "Mais Ações" (3 pontinhos)
+var lastStep = 0, lastBtn = 0;
 
 // Botões dedicados -> { target: app a abrir, kill: [apps nativos a fechar] }
 var REMAP = {
@@ -26,12 +24,17 @@ var REMAP = {
   1117: { target: 'com.visiontv.app',       kill: ['amazon.alexa.view'] }                    // Assistente -> IPTV
 };
 
-function digit(code) {
-  if (code >= 2 && code <= 10) return code - 1; // code 2..10 => dígito 1..9
-  if (code === 11) return 0;                     // code 11    => dígito 0
-  return -1;
-}
 function sh(cmd) { try { cp.exec(cmd); } catch (e) {} }
+// lê o backlight atual, normaliza para múltiplo de 10 e sobe +10 (100 -> 0)
+function stepBacklight() {
+  cp.exec("luna-send -n 1 -f luna://com.webos.settingsservice/getSystemSettings " +
+          "'{\"category\":\"picture\",\"keys\":[\"backlight\"]}'",
+    function (e, out) {
+      var m = /"backlight"\s*:\s*(\d+)/.exec(out || '');
+      var base = Math.round((m ? parseInt(m[1], 10) : 0) / 10) * 10;
+      setBacklight(base >= 100 ? 0 : base + 10);
+    });
+}
 function launch(id) { sh("luna-send -n 1 -f luna://com.webos.applicationManager/launch '{\"id\":\"" + id + "\"}'"); }
 function closeApp(id) { sh("luna-send -n 1 -f luna://com.webos.applicationManager/closeByAppId '{\"id\":\"" + id + "\"}'"); }
 function remap(m) {
@@ -73,15 +76,15 @@ function watch(dev) {
       var val = buf.readInt32LE(12);
       buf = buf.slice(REC);
       if (type === 1 && val === 1) {           // EV_KEY, press
+        if (code === BL_STEP_CODE) {           // "Mais Ações" -> +10% (ciclo)
+          var ts = Date.now();
+          if (ts - lastStep > 300) { lastStep = ts; stepBacklight(); }
+          continue;
+        }
         if (REMAP[code]) {                     // botão dedicado remapeado
           var tb = Date.now();
           if (tb - lastBtn > 400) { lastBtn = tb; remap(REMAP[code]); }
           continue;
-        }
-        var d = digit(code);
-        if (d >= 0) {
-          var now = Date.now();
-          if (now - last > DEBOUNCE) { last = now; setBacklight(d === 0 ? 100 : d * 10); }
         }
       }
     }

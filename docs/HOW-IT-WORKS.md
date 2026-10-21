@@ -93,13 +93,14 @@ There are two layers:
 - **Everywhere else** — a tiny root daemon, `backlight-keys.js`, makes it work in **any**
   app. A web app only receives key events while it is foreground, so the daemon reads the
   remote at the input layer instead: it `cat`s the evdev devices (`/dev/input/event1`,
-  `event3–7`), parses the 16-byte `input_event` records, and on a digit press
-  (key codes 2–11 → 1–9, 0) sets the backlight and shows a **system toast**. webOS's
+  `event3–7`) and parses the 16-byte `input_event` records. On a press of the **"More
+  Actions" (3-dots) button** (key code 994) it reads the current backlight and steps it
+  **+10%**, wrapping 100 → 0, then shows a **system toast**. (Number keys are deliberately
+  *not* used here — they clash with apps that use them, e.g. YouTube seeking.) webOS's
   `surface-manager` reads the same devices but does **not** grab them exclusively, so the
-  daemon's passive read sees every press — including inside YouTube, Netflix, etc. (It
-  can't *suppress* the key, so in apps that use number keys the app still reacts too.)
-  The daemon runs as root (it calls `luna-send` directly, no hbchannel needed) and is
-  started at boot by `autostart-backlight.sh` via the webosbrew `init.d`.
+  daemon's passive read sees every press — including inside YouTube, Netflix, etc. The
+  daemon runs as root (it calls `luna-send` directly, no hbchannel needed) and is started
+  at boot by `autostart-backlight.sh` via the webosbrew `init.d`.
 
 The same daemon also **remaps the dedicated hardware buttons** (Netflix, Disney+, the
 Assistant button, …). Those buttons send high evdev key codes (e.g. Netflix = 1037,
