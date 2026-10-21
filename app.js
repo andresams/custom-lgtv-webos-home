@@ -50,6 +50,32 @@
     });
   }
 
+  /* ---------- backlight da TV pelas teclas numéricas ----------
+     1..9 => 10%..90%, 0 => 100%. Ajusta o backlight da imagem via
+     settingsservice (categoria "picture"). Mostra um overlay rápido. */
+  function setBacklight(pct){
+    pct = Math.max(0, Math.min(100, Math.round(pct)));
+    // o app (sandbox) não tem ACG para settingsservice; o serviço do Homebrew
+    // roda como root e executa o luna-send por nós. Fallback: chamada direta.
+    var payload = '{"category":"picture","settings":{"backlight":' + pct + '}}';
+    var cmd = "luna-send -n 1 -f luna://com.webos.settingsservice/setSystemSettings '" + payload + "'";
+    lunaRequest("luna://org.webosbrew.hbchannel.service/exec", { command: cmd }, function(r){
+      if(!r || r.returnValue !== true){
+        lunaRequest("luna://com.webos.settingsservice/setSystemSettings",
+          { category: "picture", settings: { backlight: pct } });
+      }
+    });
+    showBacklight(pct);
+  }
+  function showBacklight(pct){
+    var ov = $("#blOverlay"); if(!ov) return;
+    var fill = $("#blFill"), lbl = $("#blPct");
+    if(fill) fill.style.width = pct + "%";
+    if(lbl) lbl.textContent = pct + "%";
+    ov.classList.add("show");
+    clearTimeout(ov._t); ov._t = setTimeout(function(){ ov.classList.remove("show"); }, 1600);
+  }
+
   /* ---------- relógio + saudação + data ---------- */
   function greeting(h){
     if(h<6) return "Boa madrugada";
@@ -460,6 +486,13 @@
   }
   function onKey(e){
     var k = e.keyCode;
+    // teclas numéricas (fileira 48-57 e numpad 96-105): ajustam o backlight
+    if((k>=48 && k<=57) || (k>=96 && k<=105)){
+      var d = k>=96 ? k-96 : k-48;      // dígito 0..9
+      setBacklight(d===0 ? 100 : d*10); // 0 => 100%, 1..9 => 10..90%
+      e.preventDefault();
+      return;
+    }
     var moved = true;
     if(k===37){ if(cur%COLS>0) focusIdx(cur-1); }              // ←
     else if(k===39){ if(cur%COLS<COLS-1 && cur+1<tiles.length) focusIdx(cur+1); } // →

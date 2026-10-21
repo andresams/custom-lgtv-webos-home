@@ -33,6 +33,10 @@ football** fixtures/results — all over a full-screen wallpaper.
 - **Single refresh button** — one control in the top bar refreshes every on-screen
   API at once, with a timeout-guarded "all updated" toast and a "last updated HH:MM"
   stamp.
+- **Backlight shortcuts** — the remote's number keys set the TV backlight (1–9 →
+  10–90%, 0 → 100%), with an on-screen level overlay. A sandboxed app can't change
+  picture settings itself, so it runs the change through the Homebrew Channel's root
+  `exec` service.
 - **Boots as the home screen** — optional autostart + Home-button redirect so the TV
   opens straight into this app.
 

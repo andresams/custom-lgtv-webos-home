@@ -64,6 +64,17 @@
     backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
     opacity:0; pointer-events:none; transition:opacity .25s, transform .25s;}
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  /* overlay do backlight (teclas numéricas) */
+  .bl-overlay{position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(.96); z-index:60;
+    display:flex; flex-direction:column; align-items:center; gap:18px;
+    background:rgba(20,22,28,.86); color:#fff; padding:34px 44px; border-radius:26px;
+    box-shadow:0 20px 60px rgba(0,0,0,.45); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    opacity:0; pointer-events:none; transition:opacity .18s, transform .18s;}
+  .bl-overlay.show{opacity:1; transform:translate(-50%,-50%) scale(1);}
+  .bl-overlay svg{width:48px; height:48px;}
+  .bl-bar{width:260px; height:10px; border-radius:999px; background:rgba(255,255,255,.22); overflow:hidden;}
+  .bl-fill{height:100%; width:0; border-radius:999px; background:#ffd34d; transition:width .18s;}
+  .bl-pct{font-size:30px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.5px;}
 
   /* ===== Layout principal ===== */
   .stage{flex:1; display:grid; grid-template-columns: 1fr 384px; gap:var(--gap); padding:14px 56px 48px 118px; min-height:0;}
@@ -339,6 +350,13 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- overlay do backlight (teclas numéricas) -->
+<div class="bl-overlay" id="blOverlay">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8l1.8-1.8M18 6l1.8-1.8"/></svg>
+  <div class="bl-bar"><div class="bl-fill" id="blFill"></div></div>
+  <div class="bl-pct" id="blPct">—</div>
+</div>
 
 <script src="logos.js"></script>
 <script src="config.js"></script>

@@ -77,6 +77,15 @@ restyling is mostly editing a handful of variables (see
   (`luna://com.webos.applicationManager/launch` with `{id: "<appId>"}`). The real app
   IDs for the installed apps are listed in `tools/tv-apps.json` and wired in `config.js`.
 
+### Backlight via the number keys
+
+The remote's number keys set the TV backlight (1–9 → 10–90%, 0 → 100%). Backlight lives
+in `settingsservice` (`category: "picture"`, `settings: { backlight: N }`), but a
+sandboxed app has no permission to write it — a direct bridge call silently fails. The
+app instead runs the luna command through the Homebrew Channel's root service,
+`luna://org.webosbrew.hbchannel.service/exec`, which executes it as root. A direct
+`settingsservice` call is kept as a fallback. An on-screen overlay shows the level.
+
 ## Data integrations
 
 ### Weather — Open-Meteo (direct)

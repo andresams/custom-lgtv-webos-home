@@ -114,6 +114,21 @@ The top of the `<style>` block defines the theme on `:root`:
 - **Font** — the bundled Inter variable font is in `assets/inter.woff2`; swap the file
   and the `@font-face`/`--font` to change typefaces.
 
+## Remote number keys → backlight
+
+The remote's number keys set the TV backlight: **1–9 → 10–90%**, **0 → 100%**. An
+on-screen overlay shows the level. This lives in `app.js`:
+
+- `onKey()` catches key codes `48–57` (and numpad `96–105`) and calls `setBacklight()`.
+- `setBacklight(pct)` changes the backlight. Because a sandboxed webOS app has no
+  permission to write picture settings, it runs the luna command through the Homebrew
+  Channel's root service: `luna://org.webosbrew.hbchannel.service/exec`. It falls back
+  to a direct `settingsservice` call if that service isn't present. **This feature
+  therefore needs the Homebrew Channel installed** (it already is, on a rooted TV).
+
+To change the mapping (e.g. make `0` mean 0%, or use a different step), edit the small
+block in `onKey()` and the `setBacklight` call.
+
 ## App metadata (`appinfo.json`)
 
 Change the app `title`, `icon`, and `iconColor`/`bgColor` here. If you change the `id`,
