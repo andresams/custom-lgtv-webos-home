@@ -82,9 +82,24 @@ restyling is mostly editing a handful of variables (see
 The remote's number keys set the TV backlight (1–9 → 10–90%, 0 → 100%). Backlight lives
 in `settingsservice` (`category: "picture"`, `settings: { backlight: N }`), but a
 sandboxed app has no permission to write it — a direct bridge call silently fails. The
-app instead runs the luna command through the Homebrew Channel's root service,
-`luna://org.webosbrew.hbchannel.service/exec`, which executes it as root. A direct
-`settingsservice` call is kept as a fallback. An on-screen overlay shows the level.
+change is applied through the Homebrew Channel's root service,
+`luna://org.webosbrew.hbchannel.service/exec`, which runs the luna command as root.
+
+There are two layers:
+
+- **In the home app** — `onKey()` catches the digit key codes and calls `setBacklight()`
+  (hbchannel `exec`, with a direct `settingsservice` call as fallback) and shows an
+  on-screen overlay. This only works while the home app has focus.
+- **Everywhere else** — a tiny root daemon, `backlight-keys.js`, makes it work in **any**
+  app. A web app only receives key events while it is foreground, so the daemon reads the
+  remote at the input layer instead: it `cat`s the evdev devices (`/dev/input/event1`,
+  `event3–7`), parses the 16-byte `input_event` records, and on a digit press
+  (key codes 2–11 → 1–9, 0) sets the backlight and shows a **system toast**. webOS's
+  `surface-manager` reads the same devices but does **not** grab them exclusively, so the
+  daemon's passive read sees every press — including inside YouTube, Netflix, etc. (It
+  can't *suppress* the key, so in apps that use number keys the app still reacts too.)
+  The daemon runs as root (it calls `luna-send` directly, no hbchannel needed) and is
+  started at boot by `autostart-backlight.sh` via the webosbrew `init.d`.
 
 ## Data integrations
 
@@ -173,5 +188,7 @@ redirects the Home button to `com.andresa.home`. Step-by-step: [INSTALL.md](INST
 | `tools/build-ipk.sh` | Manual `.ipk` packaging with cache-busting. |
 | `tools/hb-install.mjs` | Install the `.ipk` via the Homebrew Channel (SSAP). |
 | `tools/tvtelnet.py` | Run one command in the TV's root Telnet shell. |
-| `tools/autostart-apply.sh` | Autostart + Home-button redirect. |
+| `autostart-apply.sh` | Autostart + Home-button redirect. |
+| `backlight-keys.js` | Root daemon: number keys → backlight in any app. |
+| `autostart-backlight.sh` | Installs/starts the backlight daemon at boot. |
 | `tools/ssap-list-apps.mjs` | Pair with the TV and list installed app IDs. |

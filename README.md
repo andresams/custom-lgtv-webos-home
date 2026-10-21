@@ -34,9 +34,10 @@ football** fixtures/results — all over a full-screen wallpaper.
   API at once, with a timeout-guarded "all updated" toast and a "last updated HH:MM"
   stamp.
 - **Backlight shortcuts** — the remote's number keys set the TV backlight (1–9 →
-  10–90%, 0 → 100%), with an on-screen level overlay. A sandboxed app can't change
-  picture settings itself, so it runs the change through the Homebrew Channel's root
-  `exec` service.
+  10–90%, 0 → 100%). On the home screen the app handles it (with an on-screen overlay);
+  a small **root daemon** (`backlight-keys.js`) makes it work in **any app** by reading
+  the remote at the input layer and showing a system toast. See
+  [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md#backlight-via-the-number-keys).
 - **Boots as the home screen** — optional autostart + Home-button redirect so the TV
   opens straight into this app.
 

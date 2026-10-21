@@ -93,6 +93,24 @@ It is reversible — remove the autostart entry / watcher to go back to the stoc
 > **Keep firmware auto-update OFF.** A firmware update can remove root and the autostart
 > hooks.
 
+## 6. Global backlight daemon (optional)
+
+Makes the number-key backlight shortcuts work in **any** app (not just the home). It
+installs a small root daemon plus a boot entry:
+
+```bash
+# serve the two files (step 2 already does this), then on the TV:
+python3 tools/tvtelnet.py "mkdir -p /var/lib/webosbrew/backlight-keys /var/lib/webosbrew/init.d && \
+  curl -s -o /var/lib/webosbrew/backlight-keys/daemon.js http://<YOUR-COMPUTER-IP>:8777/backlight-keys.js && \
+  curl -s -o /var/lib/webosbrew/init.d/backlight-keys http://<YOUR-COMPUTER-IP>:8777/autostart-backlight.sh && \
+  chmod +x /var/lib/webosbrew/init.d/backlight-keys && \
+  sh /var/lib/webosbrew/init.d/backlight-keys && echo ok" <TV-IP> 12
+```
+
+It reads the remote at the input layer (`/dev/input/event*`), so it catches digits even
+while another app is foreground, and shows a system toast. Starts automatically at boot.
+To disable: `touch /var/lib/webosbrew/backlight-keys/disabled` (and `pkill -f daemon.js`).
+
 ## Updating later
 
 Re-run **build → serve → install → launch** (steps 1–4). Nothing else is needed; the
