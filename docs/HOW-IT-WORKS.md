@@ -101,6 +101,15 @@ There are two layers:
   The daemon runs as root (it calls `luna-send` directly, no hbchannel needed) and is
   started at boot by `autostart-backlight.sh` via the webosbrew `init.d`.
 
+The same daemon also **remaps the dedicated hardware buttons** (Netflix, Disney+, the
+Assistant button, …). Those buttons send high evdev key codes (e.g. Netflix = 1037,
+Disney+ = 1042, Assistant = 1117), and the system launches its own app on each. The
+daemon can't suppress that launch (same input-grab limit), so for each remapped button
+it launches the app you want and then, reactively, watches `getForegroundAppInfo` and
+closes the native app the moment it appears, relaunching the target until it stays in
+front. A brief flash of the original app is therefore unavoidable, but it ends on your
+app. The button → app table (`REMAP`) lives at the top of `backlight-keys.js`.
+
 ## Data integrations
 
 ### Weather — Open-Meteo (direct)

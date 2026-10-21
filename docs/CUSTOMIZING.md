@@ -129,6 +129,29 @@ on-screen overlay shows the level. This lives in `app.js`:
 To change the mapping (e.g. make `0` mean 0%, or use a different step), edit the small
 block in `onKey()` and the `setBacklight` call.
 
+## Remapping the hardware buttons
+
+The dedicated streaming buttons on the remote (Netflix, Disney+, the Assistant button…)
+are remapped by the same daemon. Edit the `REMAP` table at the top of `backlight-keys.js`:
+
+```js
+var REMAP = {
+  1037: { target: 'youtube.leanback.v4',    kill: ['com.webos.app.discovery', 'netflix'] }, // Netflix  -> YouTube
+  1042: { target: 'com.crunchyroll.webapp', kill: ['com.disney.disneyplus-prod'] },          // Disney+  -> Crunchyroll
+  1117: { target: 'com.visiontv.app',       kill: ['amazon.alexa.view'] }                     // Assistant -> IPTV
+};
+```
+
+- The **key** is the button's evdev code. Find a button's code by watching the input
+  devices while you press it (the capture helper `tools/evcap.js` prints press codes).
+- `target` is the app ID to open (see `tools/tv-apps.json` for installed IDs).
+- `kill` lists the native app(s) the system launches for that button — the daemon closes
+  them so your app wins. Include the content store `com.webos.app.discovery` for buttons
+  whose native app isn't installed.
+
+After editing, copy the file to `/var/lib/webosbrew/backlight-keys/daemon.js` on the TV
+and restart it (`sh /var/lib/webosbrew/init.d/backlight-keys`).
+
 ## App metadata (`appinfo.json`)
 
 Change the app `title`, `icon`, and `iconColor`/`bgColor` here. If you change the `id`,

@@ -6,8 +6,9 @@
 BASE=/var/lib/webosbrew/backlight-keys
 [ ! -e "$BASE/disabled" ] || exit 0
 
-# não duplica: encerra instância anterior antes de subir
+# não duplica: encerra instância anterior (node + cats órfãos) antes de subir
 pkill -f "$BASE/daemon.js" 2>/dev/null
+pkill -f 'cat /dev/input/event' 2>/dev/null
 
 (
   # espera o settingsservice responder (sistema pronto)

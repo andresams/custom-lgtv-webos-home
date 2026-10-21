@@ -38,6 +38,11 @@ football** fixtures/results — all over a full-screen wallpaper.
   a small **root daemon** (`backlight-keys.js`) makes it work in **any app** by reading
   the remote at the input layer and showing a system toast. See
   [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md#backlight-via-the-number-keys).
+- **Remappable hardware buttons** — the same daemon turns the remote's dedicated
+  streaming buttons (Netflix, Disney+, the Assistant button…) into launchers for apps
+  you actually use (YouTube, Crunchyroll, IPTV): it opens your app and closes the one
+  the system launches. (A brief flash of the original app is unavoidable without
+  grabbing the remote.)
 - **Boots as the home screen** — optional autostart + Home-button redirect so the TV
   opens straight into this app.
 
